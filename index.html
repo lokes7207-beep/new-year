@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Happy New Year 2026</title>
+    <style>
+        body { margin: 0; overflow: hidden; background-color: #000000; font-family: 'Arial', sans-serif; }
+        #overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: center;
+            pointer-events: none;
+            z-index: 1;
+        }
+        h1 {
+            margin-top: 10vh;
+            font-size: 4vw;
+            text-align: center;
+            font-weight: 900;
+            text-transform: uppercase;
+            background: linear-gradient(90deg, #ff00cc, #3333ff, #ff00cc);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            background-size: 200% auto;
+            animation: shine 3s linear infinite;
+            text-shadow: 0 0 20px rgba(255, 0, 204, 0.3);
+            letter-spacing: 2px;
+        }
+        @keyframes shine {
+            to { background-position: 200% center; }
+        }
+        @media (max-width: 600px) {
+            h1 { font-size: 8vw; margin-top: 15vh; }
+            p { font-size: 4vw; }
+        }
+        p {
+            position: absolute;
+            bottom: 20px;
+            width: 100%;
+            text-align: center;
+            color: #ffffff;
+            font-size: 1.5vw;
+            text-shadow: 0 0 10px #ff00cc;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div id="overlay">
+        <h1>Wish You<br>Happy New Year<br>2026</h1>
+        <p>தொடக்கமும் நீயே... முடிவும் நீயே! என் இதயம் முதலில் நேசித்த பெண்ணும் நீ... இறுதியாக நேசிக்கப் போகும் பெண்ணும் நீ!</p>
+    </div>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+    <script>
+
+        // 1. Scene Setup
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x000000);
+
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.position.set(0, 3, 7);
+        camera.lookAt(0, 1, 0);
+
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.shadowMap.enabled = true;
+        document.body.appendChild(renderer.domElement);
+
+        // 1.5 Galaxy Background
+        const starGeo = new THREE.BufferGeometry();
+        const starCount = 6000;
+        const starPos = new Float32Array(starCount * 3);
+        const starCols = new Float32Array(starCount * 3);
+        for(let i=0; i<starCount; i++) {
+            starPos[i*3] = (Math.random() - 0.5) * 200;
+            starPos[i*3+1] = (Math.random() - 0.5) * 200;
+            starPos[i*3+2] = (Math.random() - 0.5) * 200;
+            const color = new THREE.Color();
+            const r = Math.random();
+            if(r > 0.8) color.setHex(0xff00cc); // Pink
+            else if(r > 0.6) color.setHex(0x3333ff); // Blue
+            else if(r > 0.4) color.setHex(0x9900ff); // Purple
+            else color.setHex(0xffffff); // White
+            starCols[i*3] = color.r; starCols[i*3+1] = color.g; starCols[i*3+2] = color.b;
+        }
+        starGeo.setAttribute('position', new THREE.BufferAttribute(starPos, 3));
+        starGeo.setAttribute('color', new THREE.BufferAttribute(starCols, 3));
+        const starMat = new THREE.PointsMaterial({ size: 0.15, vertexColors: true });
+        const stars = new THREE.Points(starGeo, starMat);
+        scene.add(stars);
+
+        // 2. Lighting
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.3);
+        scene.add(ambientLight);
+
+        const spotLight = new THREE.SpotLight(0xffffff, 10);
+        spotLight.position.set(5, 10, 5);
+        spotLight.angle = Math.PI / 4;
+        spotLight.penumbra = 0.5;
+        spotLight.castShadow = true;
+        scene.add(spotLight);
+
+        // 3. Couples Image
+        const coupleGroup = new THREE.Group();
+        scene.add(coupleGroup);
+        coupleGroup.position.set(0, -1.8, -1);
+
+        const textureLoader = new THREE.TextureLoader();
+        // Placeholder image of a couple
+        const imgUrl = 'https://images.unsplash.com/photo-1518199266791-5375a83190b7?auto=format&fit=crop&w=800&q=80';
+        const coupleTexture = textureLoader.load(imgUrl);
+
+        // Image Plane
+        const imgGeo = new THREE.PlaneGeometry(3, 4);
+        const imgMat = new THREE.MeshStandardMaterial({ map: coupleTexture, side: THREE.DoubleSide });
+        const imageMesh = new THREE.Mesh(imgGeo, imgMat);
+        imageMesh.position.z = 0;
+        coupleGroup.add(imageMesh);
+
+        // 4. Rose Petals
+        // Generate a petal texture on the fly
+        function createPetalTexture() {
+            const canvas = document.createElement('canvas');
+            canvas.width = 128; canvas.height = 128;
+            const ctx = canvas.getContext('2d');
+            
+            // Draw a rose petal shape
+            ctx.beginPath();
+            ctx.moveTo(64, 128);
+            ctx.bezierCurveTo(0, 80, 0, 20, 64, 0);
+            ctx.bezierCurveTo(128, 20, 128, 80, 64, 128);
+            
+            // Gradient fill
+            const grd = ctx.createLinearGradient(0, 0, 0, 128);
+            grd.addColorStop(0, "#ff3366");
+            grd.addColorStop(1, "#990033");
+            ctx.fillStyle = grd;
+            ctx.fill();
+            
+            return new THREE.CanvasTexture(canvas);
+        }
+
+        const petalCount = 300;
+        const petals = [];
+        const petalGeo = new THREE.PlaneGeometry(0.3, 0.3);
+        const petalMat = new THREE.MeshBasicMaterial({ 
+            map: createPetalTexture(), 
+            transparent: true, 
+            side: THREE.DoubleSide,
+            alphaTest: 0.5 
+        });
+
+        for(let i = 0; i < petalCount; i++) {
+            const petal = new THREE.Mesh(petalGeo, petalMat);
+            
+            // Random start position
+            petal.position.set(
+                (Math.random() - 0.5) * 10,
+                Math.random() * 10 + 2,
+                (Math.random() - 0.5) * 10
+            );
+            
+            // Random rotation
+            petal.rotation.set(Math.random() * Math.PI, Math.random() * Math.PI, Math.random() * Math.PI);
+            
+            scene.add(petal);
+            
+            petals.push({
+                mesh: petal,
+                velocity: { 
+                    y: -Math.random() * 0.03 - 0.01, 
+                    x: (Math.random() - 0.5) * 0.02, 
+                    z: (Math.random() - 0.5) * 0.02,
+                    rotX: (Math.random() - 0.5) * 0.05,
+                    rotZ: (Math.random() - 0.5) * 0.05
+                }
+            });
+        }
+
+        // 4.5 Fireworks
+        const fireworks = [];
+
+        function createFirework() {
+            const firework = {};
+            firework.type = 'seed';
+            
+            // Random position behind the couple
+            const x = (Math.random() - 0.5) * 40;
+            const y = -5;
+            const z = -15 - Math.random() * 20; 
+            
+            const color = new THREE.Color();
+            color.setHSL(Math.random(), 1, 0.6);
+            
+            const geometry = new THREE.SphereGeometry(0.15, 8, 8);
+            const material = new THREE.MeshBasicMaterial({ color: color });
+            firework.mesh = new THREE.Mesh(geometry, material);
+            firework.mesh.position.set(x, y, z);
+            
+            firework.velocity = new THREE.Vector3(0, 0.4 + Math.random() * 0.3, 0);
+            firework.targetY = 4 + Math.random() * 8;
+            firework.color = color;
+            
+            scene.add(firework.mesh);
+            fireworks.push(firework);
+        }
+
+        function explodeFirework(firework) {
+            scene.remove(firework.mesh);
+            
+            const particleCount = 150;
+            const geometry = new THREE.BufferGeometry();
+            const positions = new Float32Array(particleCount * 3);
+            const colors = new Float32Array(particleCount * 3);
+            const vels = [];
+            
+            for(let i=0; i<particleCount; i++) {
+                positions[i*3] = firework.mesh.position.x;
+                positions[i*3+1] = firework.mesh.position.y;
+                positions[i*3+2] = firework.mesh.position.z;
+                
+                colors[i*3] = firework.color.r;
+                colors[i*3+1] = firework.color.g;
+                colors[i*3+2] = firework.color.b;
+                
+                const theta = Math.random() * Math.PI * 2;
+                const phi = Math.random() * Math.PI;
+                const speed = 0.1 + Math.random() * 0.3;
+                
+                vels.push({
+                    x: speed * Math.sin(phi) * Math.cos(theta),
+                    y: speed * Math.sin(phi) * Math.sin(theta),
+                    z: speed * Math.cos(phi)
+                });
+            }
+            
+            geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+            geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+            
+            const material = new THREE.PointsMaterial({ size: 0.3, vertexColors: true, transparent: true, opacity: 1, blending: THREE.AdditiveBlending });
+            const particles = new THREE.Points(geometry, material);
+            
+            const explosion = {
+                type: 'explosion',
+                mesh: particles,
+                velocities: vels,
+                life: 1.0
+            };
+            
+            scene.add(particles);
+            fireworks.push(explosion);
+        }
+
+        // 5. Animation Loop
+        const clock = new THREE.Clock();
+        function animate() {
+            requestAnimationFrame(animate);
+            const time = clock.getElapsedTime();
+
+            // Rotate Couple Image
+            coupleGroup.rotation.y = Math.sin(time * 0.5) * 0.2;
+
+            // Rotate Galaxy
+            stars.rotation.y = time * 0.05;
+
+            // Move Petals
+            for(let i = 0; i < petalCount; i++) {
+                const p = petals[i];
+                p.mesh.position.y += p.velocity.y;
+                p.mesh.position.x += p.velocity.x + Math.sin(time + i) * 0.005;
+                p.mesh.position.z += p.velocity.z + Math.cos(time + i) * 0.005;
+                
+                // Tumble rotation
+                p.mesh.rotation.x += p.velocity.rotX;
+                p.mesh.rotation.z += p.velocity.rotZ;
+
+                if(p.mesh.position.y < -2) {
+                    p.mesh.position.y = 8; // Reset to top
+                }
+            }
+
+            // Update Fireworks
+            if (Math.random() < 0.02) createFirework(); // Spawn chance
+
+            for (let i = fireworks.length - 1; i >= 0; i--) {
+                const fw = fireworks[i];
+                if (fw.type === 'seed') {
+                    fw.mesh.position.add(fw.velocity);
+                    if (fw.mesh.position.y >= fw.targetY) {
+                        explodeFirework(fw);
+                        fireworks.splice(i, 1);
+                    }
+                } else if (fw.type === 'explosion') {
+                    const positions = fw.mesh.geometry.attributes.position.array;
+                    for(let j=0; j<fw.velocities.length; j++) {
+                        positions[j*3] += fw.velocities[j].x;
+                        positions[j*3+1] += fw.velocities[j].y;
+                        positions[j*3+2] += fw.velocities[j].z;
+                        fw.velocities[j].y -= 0.005; // Gravity
+                    }
+                    fw.mesh.geometry.attributes.position.needsUpdate = true;
+                    
+                    fw.life -= 0.015;
+                    fw.mesh.material.opacity = fw.life;
+                    
+                    if (fw.life <= 0) {
+                        scene.remove(fw.mesh);
+                        fireworks.splice(i, 1);
+                    }
+                }
+            }
+
+            renderer.render(scene, camera);
+        }
+
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        // Text Animation: Word by Word
+        const textP = document.querySelector('p');
+        const textString = textP.innerText;
+        textP.innerHTML = ''; // Clear content
+        
+        const wordsArray = textString.split(' ');
+        wordsArray.forEach((word, index) => {
+            const span = document.createElement('span');
+            span.textContent = word + ' ';
+            span.style.opacity = '0';
+            span.style.transition = 'opacity 0.5s';
+            textP.appendChild(span);
+            setTimeout(() => {
+                span.style.opacity = '1';
+            }, index * 800);
+        });
+
+        animate();
+    </script>
+</body>
+</html>

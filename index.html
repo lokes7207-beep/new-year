@@ -116,13 +116,14 @@
         coupleGroup.position.set(0, -1.8, -1);
 
         const textureLoader = new THREE.TextureLoader();
-        // Placeholder image of a couple
-        const imgUrl = 'https://images.unsplash.com/photo-1518199266791-5375a83190b7?auto=format&fit=crop&w=800&q=80';
+        textureLoader.crossOrigin = 'Anonymous';
+        // Use a CORS proxy (wsrv.nl) to ensure the Pinterest image loads in WebGL
+        const imgUrl = 'https://wsrv.nl/?url=https://i.pinimg.com/736x/55/7b/d3/557bd34de12596a1b8ad96889edf1d6c.jpg';
         const coupleTexture = textureLoader.load(imgUrl);
 
         // Image Plane
-        const imgGeo = new THREE.PlaneGeometry(3, 4);
-        const imgMat = new THREE.MeshStandardMaterial({ map: coupleTexture, side: THREE.DoubleSide });
+        const imgGeo = new THREE.PlaneGeometry(4.5, 6);
+        const imgMat = new THREE.MeshBasicMaterial({ map: coupleTexture, side: THREE.DoubleSide });
         const imageMesh = new THREE.Mesh(imgGeo, imgMat);
         imageMesh.position.z = 0;
         coupleGroup.add(imageMesh);
@@ -150,7 +151,7 @@
             return new THREE.CanvasTexture(canvas);
         }
 
-        const petalCount = 300;
+        const petalCount = 100;
         const petals = [];
         const petalGeo = new THREE.PlaneGeometry(0.3, 0.3);
         const petalMat = new THREE.MeshBasicMaterial({ 
